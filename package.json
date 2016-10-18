@@ -1,0 +1,51 @@
+{
+  "name": "stemr",
+  "main": "dist/umd/stemr.js",
+  "module": "dist/es6/stemr.js",
+  "typings": "dist/typings/stemr.d.ts",
+  "version": "0.1.0",
+  "description": "Snowball stemmer library.",
+  "license": "MIT",
+  "author": {
+    "name": "Boris Kaul",
+    "email": "localvoid@gmail.com",
+    "url": "https://github.com/localvoid"
+  },
+  "keywords": [
+    "stem",
+    "stemming",
+    "porter2",
+    "snowball"
+  ],
+  "homepage": "https://github.com/localvoid/stemr",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/localvoid/stemr"
+  },
+  "bugs": {
+    "url": "https://github.com/localvoid/stemr/issues"
+  },
+  "github": "https://github.com/localvoid/stemr",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.45",
+    "chai": "^3.4.1",
+    "del": "^2.2.2",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-mocha": "^3.0.1",
+    "gulp-tslint": "^6.1.2",
+    "gulp-typescript": "^3.0.2",
+    "merge2": "^1.0.2",
+    "mocha": "^2.2.5",
+    "rollup": "^0.36.3",
+    "ts-node": "^1.6.0",
+    "typescript": "^2.0.3"
+  }
+}

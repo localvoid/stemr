@@ -5,25 +5,30 @@
  */
 
 // Exceptional forms
-const EXCEPTIONAL_FORMS: { [k: string]: string } = {
+const EXCEPTIONAL_FORMS4: { [k: string]: string } = {
   "skis": "ski",
+  "idly": "idl",
+  "ugly": "ugli",
+  "only": "onli",
+  "news": "news",
+  "howe": "howe",
+  "bias": "bias",
+};
+
+const EXCEPTIONAL_FORMS5: { [k: string]: string } = {
   "skies": "sky",
   "dying": "die",
   "lying": "lie",
   "tying": "tie",
-  "idly": "idl",
-  "gently": "gentl",
-  "ugly": "ugli",
   "early": "earli",
-  "only": "onli",
-  "singly": "singl",
-  "sky": "sky",
-  "news": "news",
-  "howe": "howe",
   "atlas": "atlas",
+  "andes": "andes",
+};
+
+const EXCEPTIONAL_FORMS6: { [k: string]: string } = {
+  "gently": "gentl",
+  "singly": "singl",
   "cosmos": "cosmos",
-  "bias": "bias",
-  "andes": "andes"
 };
 
 // Exceptional forms post 1a step
@@ -40,31 +45,6 @@ const EXCEPTIONAL_FORMS_POST_1A: { [k: string]: number } = {
 
 const RANGE_RE = /[^aeiouy]*[aeiouy]+[^aeiouy](\w*)/;
 
-function getR1(word: string): number {
-  if (word.startsWith("gener") || word.startsWith("arsen")) {
-    return 5;
-  }
-  if (word.startsWith("commun")) {
-    return 6;
-  }
-
-  const match = RANGE_RE.exec(word);
-  if (match) {
-    return word.length - match[1].length;
-  }
-
-  return word.length;
-}
-
-function getR2(word: string): number {
-  const match = RANGE_RE.exec(word.slice(getR1(word)));
-  if (match) {
-    return word.length - match[1].length;
-  }
-
-  return word.length;
-}
-
 const EWSS1_RE = /^[aeiouy][^aeiouy]$/;
 const EWSS2_RE = /.*[^aeiouy][aeiouy][^aeiouywxY]$/;
 
@@ -75,68 +55,21 @@ function isEndsWithShortSyllable(word: string): boolean {
   return EWSS2_RE.test(word);
 }
 
-function isShortWord(word: string): boolean {
-  return (isEndsWithShortSyllable(word) && getR1(word) === word.length);
-}
-
 // Capitalize consonant regexp
 const CCY_RE = /([aeiouy])y/g;
-
-function capitalizeConsonantYs(word: string): string {
-  if (word.charCodeAt(0) === 121) { // "y" === 121
-    word = "Y" + word.slice(1);
-  }
-  return word.replace(CCY_RE, "$1Y");
-}
-
-function step0(word: string): string {
-  if (word.endsWith("'s'")) {
-    return word.slice(0, -3);
-  }
-  if (word.endsWith("'s")) {
-    return word.slice(0, -2);
-  }
-  if (word.endsWith("'")) {
-    return word.slice(0, -1);
-  }
-  return word;
-}
-
 const S1A_RE = /[aeiouy]./;
-
-function step1a(word: string): string {
-  if (word.endsWith("sses")) {
-    return word.slice(0, -4) + "ss";
-  }
-  if (word.endsWith("ied") || word.endsWith("ies")) {
-    return word.slice(0, -3) + ((word.length > 4) ? "i" : "ie");
-  }
-  if (word.endsWith("us") || word.endsWith("ss")) {
-    return word;
-  }
-  if (word.endsWith("s")) {
-    const preceding = word.slice(0, -1);
-    if (S1A_RE.test(preceding)) {
-      return preceding;
-    }
-  }
-  return word;
-}
-
 const DOUBLE_RE = /(bb|dd|ff|gg|mm|nn|pp|rr|tt)$/;
 
-function isEndsWithDouble(word: string): boolean {
-  return DOUBLE_RE.test(word);
-}
-
-function step1bHelper(word: string): string {
+function step1bHelper(word: string, r1: number): string {
   if (word.endsWith("at") || word.endsWith("bl") || word.endsWith("iz")) {
     return word + "e";
   }
-  if (isEndsWithDouble(word)) {
+  // double ending
+  if (DOUBLE_RE.test(word)) {
     return word.slice(0, -1);
   }
-  if (isShortWord(word)) {
+  // is short word
+  if ((isEndsWithShortSyllable(word) && r1 === word.length)) {
     return word + "e";
   }
   return word;
@@ -162,23 +95,10 @@ function step1b(word: string, r1: number): string {
   if (match) {
     const preceding = word.slice(0, -match[0].length);
     if (S1B_RE.test(preceding)) {
-      return step1bHelper(preceding);
+      return step1bHelper(preceding, r1);
     }
   }
 
-  return word;
-}
-
-function step1c(word: string): string {
-  if (word.endsWith("y") || word.endsWith("Y") && word.length > 1) {
-    const c = word.charCodeAt(word.length - 2);
-    if (word.length > 2) {
-      // "a|e|i|o|u|y"
-      if (c < 97 || c > 121 || (c !== 97 && c !== 101 && c !== 105 && c !== 111 && c !== 117 && c !== 121)) {
-        return word.slice(0, -1) + "i";
-      }
-    }
-  }
   return word;
 }
 
@@ -202,14 +122,6 @@ function step2Helper(word: string, r1: number, end: string, repl: string, prev: 
 }
 
 const S2_TRIPLES: Array<[string, string, Array<string> | null]> = [
-  ["ization", "ize", null],
-  ["ational", "ate", null],
-  ["fulness", "ful", null],
-  ["ousness", "ous", null],
-  ["iveness", "ive", null],
-  ["tional", "tion", null],
-  ["biliti", "ble", null],
-  ["lessli", "less", null],
   ["entli", "ent", null],
   ["ation", "ate", null],
   ["alism", "al", null],
@@ -225,12 +137,25 @@ const S2_TRIPLES: Array<[string, string, Array<string> | null]> = [
   ["alli", "al", null],
   ["bli", "ble", null],
   ["ogi", "og", ["l"]],
-  ["li", "", ["c", "d", "e", "g", "h", "k", "m", "n", "r", "t"]]
+  ["li", "", ["c", "d", "e", "g", "h", "k", "m", "n", "r", "t"]],
 ];
 
+const S2_TRIPLES6 = ([
+  ["ization", "ize", null],
+  ["ational", "ate", null],
+  ["fulness", "ful", null],
+  ["ousness", "ous", null],
+  ["iveness", "ive", null],
+  ["tional", "tion", null],
+  ["biliti", "ble", null],
+  ["lessli", "less", null],
+] as Array<[string, string, Array<string> | null]>).concat(S2_TRIPLES);
+
 function step2(word: string, r1: number): string {
-  for (let i = 0; i < S2_TRIPLES.length; i++) {
-    const trip = S2_TRIPLES[i];
+  const triples = (word.length > 5) ? S2_TRIPLES6 : S2_TRIPLES;
+
+  for (let i = 0; i < triples.length; i++) {
+    const trip = triples[i];
     const attempt = step2Helper(word, r1, trip[0], trip[1], trip[2]);
     if (attempt !== null) {
       return attempt;
@@ -255,22 +180,22 @@ function step3Helper(word: string, r1: number, r2: number, end: string, repl: st
   return null;
 }
 
-const S3_TRIPLES: Array<[string, string, boolean]> = [
-  ["ational", "ate", false],
-  ["tional", "tion", false],
-  ["alize", "al", false],
-  ["icate", "ic", false],
-  ["iciti", "ic", false],
-  ["ative", "", true],
-  ["ical", "ic", false],
-  ["ness", "", false],
-  ["ful", "", false]
+const S3_TRIPLES: Array<{ a: string, b: string, c: boolean }> = [
+  { a: "ational", b: "ate", c: false },
+  { a: "tional", b: "tion", c: false },
+  { a: "alize", b: "al", c: false },
+  { a: "icate", b: "ic", c: false },
+  { a: "iciti", b: "ic", c: false },
+  { a: "ative", b: "", c: true },
+  { a: "ical", b: "ic", c: false },
+  { a: "ness", b: "", c: false },
+  { a: "ful", b: "", c: false },
 ];
 
 function step3(word: string, r1: number, r2: number): string {
   for (let i = 0; i < S3_TRIPLES.length; i++) {
     const trip = S3_TRIPLES[i];
-    const attempt = step3Helper(word, r1, r2, trip[0], trip[1], trip[2]);
+    const attempt = step3Helper(word, r1, r2, trip.a, trip.b, trip.c);
     if (attempt !== null) {
       return attempt;
     }
@@ -292,8 +217,9 @@ function step4(word: string, r2: number): string {
     }
   }
 
-  if (word.endsWith("sion") || word.endsWith("tion")) {
-    if (word.length - 3 >= r2) {
+  if ((word.length - 3) >= r2) {
+    const l = word.charCodeAt(word.length - 4);
+    if ((l === 115 || l === 116) && word.endsWith("ion")) { // s === 115 , t === 116
       return word.slice(0, -3);
     }
   }
@@ -301,31 +227,7 @@ function step4(word: string, r2: number): string {
   return word;
 }
 
-function step5(word: string, r1: number, r2: number): string {
-  if (word.endsWith("l")) {
-    if (word.length - 1 >= r2 && word.charCodeAt(word.length - 2) === 108) { // l === 108
-      return word.slice(0, -1);
-    }
-    return word;
-  }
-
-  if (word.endsWith("e")) {
-    if (word.length - 1 >= r2) {
-      return word.slice(0, -1);
-    }
-    if (word.length - 1 >= r1 && !isEndsWithShortSyllable(word.slice(0, -1))) {
-      return word.slice(0, -1);
-    }
-  }
-
-  return word;
-}
-
 const NORMALIZE_YS_RE = /Y/g;
-
-function normalizeYs(word: string): string {
-  return word.replace(NORMALIZE_YS_RE, "y");
-}
 
 export function stem(word: string): string {
   if (word.length < 3) {
@@ -338,30 +240,111 @@ export function stem(word: string): string {
   }
 
   // handle exceptional forms
-  if (EXCEPTIONAL_FORMS.hasOwnProperty(word)) {
-    return EXCEPTIONAL_FORMS[word];
+  if (word === "sky") {
+    return word;
+  } else if (word.length < 7) {
+    if (word.length === 4) {
+      if (EXCEPTIONAL_FORMS4.hasOwnProperty(word)) {
+        return EXCEPTIONAL_FORMS4[word];
+      }
+    } else if (word.length === 5) {
+      if (EXCEPTIONAL_FORMS5.hasOwnProperty(word)) {
+        return EXCEPTIONAL_FORMS5[word];
+      }
+    } else if (word.length === 6) {
+      if (EXCEPTIONAL_FORMS6.hasOwnProperty(word)) {
+        return EXCEPTIONAL_FORMS6[word];
+      }
+    }
   }
 
-  word = capitalizeConsonantYs(word);
+  // capitalize consonant ys
+  if (word.charCodeAt(0) === 121) { // "y" === 121
+    word = "Y" + word.slice(1);
+  }
+  word = word.replace(CCY_RE, "$1Y");
 
-  const r1 = getR1(word);
-  const r2 = getR2(word);
+  // r1
+  let match: RegExpExecArray | null;
+  let r1: number;
+  if (word.length > 4 && (word.startsWith("gener") || word.startsWith("arsen"))) {
+    r1 = 5;
+  } else if (word.startsWith("commun")) {
+    r1 = 6;
+  } else {
+    match = RANGE_RE.exec(word);
+    r1 = (match) ? word.length - match[1].length : word.length;
+  }
 
-  word = step0(word);
-  word = step1a(word);
+  // r2
+  match = RANGE_RE.exec(word.slice(r1));
+  const r2 = match ? word.length - match[1].length : word.length;
+
+  // step 0
+  if (word.charCodeAt(word.length - 1) === 39) { // "'" === 39
+    if (word.endsWith("'s'")) {
+      word = word.slice(0, -3);
+    } else {
+      word = word.slice(0, -1);
+    }
+  } else if (word.endsWith("'s")) {
+    word = word.slice(0, -2);
+  }
+
+  // step 1a
+  if (word.endsWith("sses")) {
+    word = word.slice(0, -4) + "ss";
+  } else if (word.endsWith("ied") || word.endsWith("ies")) {
+    word = word.slice(0, -3) + ((word.length > 4) ? "i" : "ie");
+  } else if (word.endsWith("us") || word.endsWith("ss")) {
+    word = word;
+  } else if (word.endsWith("s")) {
+    const preceding = word.slice(0, -1);
+    if (S1A_RE.test(preceding)) {
+      word = preceding;
+    }
+  }
 
   // handle exceptional forms post 1a
-  if (EXCEPTIONAL_FORMS_POST_1A.hasOwnProperty(word)) {
+  if ((word.length === 6 || word.length === 7) && EXCEPTIONAL_FORMS_POST_1A.hasOwnProperty(word)) {
     return word;
   }
 
   word = step1b(word, r1);
-  word = step1c(word);
+
+  // step 1c
+  if (word.length > 2) {
+    let l = word.charCodeAt(word.length - 1);
+    if (l === 121 || l === 89) {
+      l = word.charCodeAt(word.length - 2);
+      // "a|e|i|o|u|y"
+      if (l < 97 || l > 121 || (l !== 97 && l !== 101 && l !== 105 && l !== 111 && l !== 117 && l !== 121)) {
+        word = word.slice(0, -1) + "i";
+      }
+    }
+  }
+
   word = step2(word, r1);
   word = step3(word, r1, r2);
   word = step4(word, r2);
-  word = step5(word, r1, r2);
-  word = normalizeYs(word);
+
+  // step 5
+  const l = word.charCodeAt(word.length - 1);
+
+  if (l === 108) { // l = 108
+    if (word.length - 1 >= r2 && word.charCodeAt(word.length - 2) === 108) { // l === 108
+      word = word.slice(0, -1);
+    }
+  } else if (l === 101) { // e = 101
+    if (word.length - 1 >= r2) {
+      word = word.slice(0, -1);
+    } else if (word.length - 1 >= r1 && !isEndsWithShortSyllable(word.slice(0, -1))) {
+      word = word.slice(0, -1);
+    }
+  }
+
+  // normalize Ys
+  word = word.replace(NORMALIZE_YS_RE, "y");
 
   return word;
 }

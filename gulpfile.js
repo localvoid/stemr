@@ -11,7 +11,7 @@ function clean() {
 function test() {
   require("ts-node/register");
 
-  return gulp.src("tests/test.ts", { read: false })
+  return gulp.src("tests/**/*.spec.ts", { read: false })
     .pipe(mocha({ reporter: "progress" }));
 }
 
@@ -44,7 +44,7 @@ function dist() {
     }),
     bundle.write({
       format: "umd",
-      moduleName: "kivi",
+      moduleName: "stemr",
       dest: "dist/umd/stemr.js",
     }),
   ]));

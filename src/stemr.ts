@@ -58,18 +58,25 @@ function isEndsWithShortSyllable(word: string): boolean {
 // Capitalize consonant regexp
 const CCY_RE = /([aeiouy])y/g;
 const S1A_RE = /[aeiouy]./;
-const DOUBLE_RE = /(bb|dd|ff|gg|mm|nn|pp|rr|tt)$/;
 
 function step1bHelper(word: string, r1: number): string {
   if (word.endsWith("at") || word.endsWith("bl") || word.endsWith("iz")) {
     return word + "e";
   }
   // double ending
-  if (DOUBLE_RE.test(word)) {
+  const l0 = word.charCodeAt(word.length - 1);
+  // /(bb|dd|ff|gg|mm|nn|pp|rr|tt)$/
+  if (l0 === word.charCodeAt(word.length - 2) &&
+    (l0 === 98 ||
+      l0 === 100 || l0 === 102 ||
+      l0 === 103 || l0 === 109 ||
+      l0 === 110 || l0 === 112 ||
+      l0 === 114 || l0 === 116)) {
+
     return word.slice(0, -1);
   }
   // is short word
-  if ((isEndsWithShortSyllable(word) && r1 === word.length)) {
+  if (r1 === word.length && isEndsWithShortSyllable(word)) {
     return word + "e";
   }
   return word;
@@ -94,7 +101,7 @@ function step1b(word: string, r1: number): string {
   const match = S1BSUFFIXES_RE.exec(word);
   if (match) {
     const preceding = word.slice(0, -match[0].length);
-    if (S1B_RE.test(preceding)) {
+    if (word.length > 1 && S1B_RE.test(preceding)) {
       return step1bHelper(preceding, r1);
     }
   }
@@ -122,13 +129,6 @@ function step2Helper(word: string, r1: number, end: string, repl: string, prev: 
 }
 
 const S2_TRIPLES: Array<[string, string, Array<string> | null]> = [
-  ["entli", "ent", null],
-  ["ation", "ate", null],
-  ["alism", "al", null],
-  ["aliti", "al", null],
-  ["ousli", "ous", null],
-  ["iviti", "ive", null],
-  ["fulli", "ful", null],
   ["enci", "ence", null],
   ["anci", "ance", null],
   ["abli", "able", null],
@@ -140,7 +140,7 @@ const S2_TRIPLES: Array<[string, string, Array<string> | null]> = [
   ["li", "", ["c", "d", "e", "g", "h", "k", "m", "n", "r", "t"]],
 ];
 
-const S2_TRIPLES6 = ([
+const S2_TRIPLES5 = ([
   ["ization", "ize", null],
   ["ational", "ate", null],
   ["fulness", "ful", null],
@@ -149,10 +149,17 @@ const S2_TRIPLES6 = ([
   ["tional", "tion", null],
   ["biliti", "ble", null],
   ["lessli", "less", null],
+  ["entli", "ent", null],
+  ["ation", "ate", null],
+  ["alism", "al", null],
+  ["aliti", "al", null],
+  ["ousli", "ous", null],
+  ["iviti", "ive", null],
+  ["fulli", "ful", null],
 ] as Array<[string, string, Array<string> | null]>).concat(S2_TRIPLES);
 
 function step2(word: string, r1: number): string {
-  const triples = (word.length > 5) ? S2_TRIPLES6 : S2_TRIPLES;
+  const triples = (word.length > 6) ? S2_TRIPLES5 : S2_TRIPLES;
 
   for (let i = 0; i < triples.length; i++) {
     const trip = triples[i];
@@ -298,7 +305,7 @@ export function stem(word: string): string {
     word = word.slice(0, -3) + ((word.length > 4) ? "i" : "ie");
   } else if (word.endsWith("us") || word.endsWith("ss")) {
     word = word;
-  } else if (word.endsWith("s")) {
+  } else if (word.charCodeAt(word.length - 1) === 115) { // "s" == 115
     const preceding = word.slice(0, -1);
     if (S1A_RE.test(preceding)) {
       word = preceding;

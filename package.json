@@ -1,6 +1,6 @@
 {
   "name": "stemr",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "es2016": "dist/es2016/index.js",

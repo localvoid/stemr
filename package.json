@@ -1,9 +1,48 @@
 {
   "name": "stemr",
-  "main": "dist/umd/stemr.js",
-  "module": "dist/es6/stemr.js",
-  "typings": "dist/typings/stemr.d.ts",
   "version": "0.1.1",
+  "main": "dist/main/index.js",
+  "module": "dist/module/index.js",
+  "es2016": "dist/es2016/index.js",
+  "typings": "dist/typings/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src",
+    "!src/**/__tests__",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepublishOnly": "npm run clean && npm run dist",
+    "clean": "rm -rf ./dist",
+    "dist": "npm run dist:main && npm run dist:module && npm run dist:es2016",
+    "dist:main": "tsc -p ./tsconfig.build.main.json",
+    "dist:module": "tsc -p ./tsconfig.build.module.json",
+    "dist:es2016": "tsc -p ./tsconfig.build.es2016.json",
+    "lint": "tslint --format codeFrame --project ./tsconfig.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:debug": "node --inspect-brk ./node_modules/.bin/jest --runInBand",
+    "test:coverage": "jest --coverage"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn lint && yarn test"
+    }
+  },
+  "devDependencies": {
+    "@types/jest": "^22.2.2",
+    "@types/node": "^10.1.2",
+    "codecov": "^3.0.2",
+    "husky": "^1.0.0-rc.4",
+    "ivi-tslint-rules": "^0.1.4",
+    "jest": "^22.4.3",
+    "ts-jest": "^22.4.6",
+    "tslib": "^1.9.1",
+    "tslint": "^5.10.0",
+    "typescript": "^2.8.3"
+  },
   "description": "Snowball stemmer library.",
   "license": "MIT",
   "author": {
@@ -25,27 +64,5 @@
   "bugs": {
     "url": "https://github.com/localvoid/stemr/issues"
   },
-  "github": "https://github.com/localvoid/stemr",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "dependencies": {},
-  "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.45",
-    "chai": "^3.4.1",
-    "del": "^2.2.2",
-    "gulp": "github:gulpjs/gulp#4.0",
-    "gulp-mocha": "^3.0.1",
-    "gulp-tslint": "^6.1.2",
-    "gulp-typescript": "^3.0.2",
-    "merge2": "^1.0.2",
-    "mocha": "^2.2.5",
-    "rollup": "^0.36.3",
-    "ts-node": "^1.6.0",
-    "typescript": "^2.0.3"
-  }
+  "github": "https://github.com/localvoid/stemr"
 }

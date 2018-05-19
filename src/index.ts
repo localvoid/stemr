@@ -40,7 +40,7 @@ const EXCEPTIONAL_FORMS_POST_1A: { [k: string]: number } = {
   "earring": 0,
   "proceed": 0,
   "exceed": 0,
-  "succeed": 0
+  "succeed": 0,
 };
 
 const RANGE_RE = /[^aeiouy]*[aeiouy]+[^aeiouy](\w*)/;
@@ -237,6 +237,11 @@ function step4(word: string, r2: number): string {
 const NORMALIZE_YS_RE = /Y/g;
 
 export function stem(word: string): string {
+  let l;
+  let match: RegExpExecArray | null;
+  let r1: number;
+  let r2: number;
+
   if (word.length < 3) {
     return word;
   }
@@ -272,8 +277,6 @@ export function stem(word: string): string {
   word = word.replace(CCY_RE, "$1Y");
 
   // r1
-  let match: RegExpExecArray | null;
-  let r1: number;
   if (word.length > 4 && (word.startsWith("gener") || word.startsWith("arsen"))) {
     r1 = 5;
   } else if (word.startsWith("commun")) {
@@ -285,7 +288,7 @@ export function stem(word: string): string {
 
   // r2
   match = RANGE_RE.exec(word.slice(r1));
-  const r2 = match ? word.length - match[1].length : word.length;
+  r2 = match ? word.length - match[1].length : word.length;
 
   // step 0
   if (word.charCodeAt(word.length - 1) === 39) { // "'" === 39
@@ -321,7 +324,7 @@ export function stem(word: string): string {
 
   // step 1c
   if (word.length > 2) {
-    let l = word.charCodeAt(word.length - 1);
+    l = word.charCodeAt(word.length - 1);
     if (l === 121 || l === 89) {
       l = word.charCodeAt(word.length - 2);
       // "a|e|i|o|u|y"
@@ -336,7 +339,7 @@ export function stem(word: string): string {
   word = step4(word, r2);
 
   // step 5
-  const l = word.charCodeAt(word.length - 1);
+  l = word.charCodeAt(word.length - 1);
 
   if (l === 108) { // l = 108
     if (word.length - 1 >= r2 && word.charCodeAt(word.length - 2) === 108) { // l === 108
